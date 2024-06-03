@@ -4,7 +4,7 @@ module.exports = (app) => {
   var router = require("express").Router();
 
   // Create story
-  router.post("/story", [authenticateRoute], Story.create)
+  router.post("/stories", [authenticateRoute], Story.create)
 
   // Retrieve a all the story properties
   router.get("/storyProperties", [authenticateRoute], Story.getStoryProperties);

@@ -33,10 +33,6 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.INTEGER,
       allowNull: false,
     },
-    updatedBy: {
-      type: Sequelize.STRING,
-      allowNull: true,
-    },
   });
 
   return Story;
