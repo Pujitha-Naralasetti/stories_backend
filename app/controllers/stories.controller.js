@@ -1,7 +1,11 @@
 const db = require("../models");
+const { Op } = require("sequelize");
 const Genre = db.genre;
 const Setting = db.setting;
 const Language = db.language;
+const Story = db.story;
+const Character = db.character;
+const StoryCharacter = db.storyCharacter;
 const { CohereClient } = require("cohere-ai");
 
 const cohere = new CohereClient({
