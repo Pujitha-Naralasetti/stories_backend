@@ -99,6 +99,84 @@ exports.create = async (req, res) => {
     });
   }
 };
+exports.findAll = async (req, res) => {
+  await Story.findAll().then((data) => {
+    res.send({
+      message: "Stories fetched successfully",
+      data: data,
+      status: "Success",
+    });
+  });
+};
+
+exports.findAllByUserId = async (req, res) => {
+  const userId = parseInt(req.params.id);
+  try {
+    await Story.findAll({
+      where: { userId: userId },
+      attributes: { exclude: ["genreId", "settingId", "languageId"] },
+      include: [
+        { model: Genre, as: "genre", required: true },
+        { model: Setting, as: "setting", required: true },
+        { model: Language, as: "language", required: true },
+        {
+          model: Character,
+          as: "characters",
+          required: true,
+        },
+      ],
+    }).then((data) => {
+      res.send({
+        message: "Stories fetched successfully",
+        data: data,
+        status: "Success",
+      });
+    });
+  } catch (err) {
+    res.status(500).send({
+      message: err.message || "Error fetching story",
+      status: "Error",
+    });
+  }
+};
+
+exports.findOne = async (req, res) => {
+  const storyId = parseInt(req.params.id);
+  try {
+    await Story.findOne({
+      where: { id: storyId },
+      attributes: { exclude: ["genreId", "settingId", "languageId"] },
+      include: [
+        { model: Genre, as: "genre", required: true },
+        { model: Setting, as: "setting", required: true },
+        { model: Language, as: "language", required: true },
+        {
+          model: Character,
+          as: "characters",
+          required: true,
+        },
+      ],
+    }).then((data) => {
+      if (!data) {
+        res.send({
+          message: "Story not found",
+          status: "Error",
+        });
+      } else {
+        res.send({
+          message: "Story fetched successfully",
+          data: data,
+          status: "Success",
+        });
+      }
+    });
+  } catch (err) {
+    res.status(500).send({
+      message: err.message || "Error fetching story",
+      status: "Error",
+    });
+  }
+};
 
 exports.getStoryProperties = async (req, res) => {
   try {

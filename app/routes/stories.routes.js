@@ -5,7 +5,18 @@ module.exports = (app) => {
 
   // Create story
   router.post("/stories", [authenticateRoute], Story.create)
+ // findAllStories
 
+ router.get("/stories/",[authenticateRoute], Story.findAll)
+
+ // findAllStoriesByUserId
+
+ router.get("/stories/User/:id",[authenticateRoute], Story.findAllByUserId)
+
+ // find story by id
+
+ router.get("/stories/:id",[authenticateRoute], Story.findOne)
+ 
   // Retrieve a all the story properties
   router.get("/storyProperties", [authenticateRoute], Story.getStoryProperties);
 
