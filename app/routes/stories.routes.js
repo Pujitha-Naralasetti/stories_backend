@@ -17,6 +17,10 @@ module.exports = (app) => {
 
  router.get("/stories/:id",[authenticateRoute], Story.findOne)
  
+  // update story  
+
+  router.put("/stories/:id", [authenticateRoute], Story.update)
+
   // Retrieve a all the story properties
   router.get("/storyProperties", [authenticateRoute], Story.getStoryProperties);
 
