@@ -1,0 +1,64 @@
+name: AWS DEPLOY TO STAGING
+# turn off deploy to AWS 
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - development
+
+jobs:
+  aws-deploy:
+    runs-on: ubuntu-latest
+    env:
+      DB_HOST: ${{ secrets.AWS_DB_HOST }}
+      DB_PW: ${{ secrets.AWS_DB_PW}}
+      DB_USER: ${{ secrets.AWS_DB_USER }}
+      DB_NAME: ${{ secrets.AWS_DB_NAME }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: dev
+      - uses: actions/setup-node@v2
+        with:
+            node-version: 18
+      - run: npm install
+
+      - run: |
+          touch .env
+          echo DB_HOST = "$DB_HOST" >> .env
+          echo DB_PW = "$DB_PW" >> .env
+          echo DB_USER = "$DB_USER" >> .env
+          echo DB_NAME = "$DB_NAME" >> .env
+          echo SECRET_KEY = "$SECRET_KEY" >> .env
+          echo COHERE_API_KEY = "$COHERE_API_KEY" >> .env
+
+      - run: npm run bundle
+
+      - name: Deploy to Server
+        uses: easingthemes/ssh-deploy@v2.1.1
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          ARGS: "-rltgoDzvO --delete"
+          SOURCE: "deploy/"
+          REMOTE_HOST: ${{ secrets.AWS_PUBLIC_DNS }}
+          REMOTE_USER: ubuntu
+          TARGET: "nodeapps/stories-backend"
+      - name: Execute SSH commmands on remote server
+        uses: JimCronqvist/action-ssh@master
+        env:
+          NAME: "Root"
+        with:
+          hosts: ${{ secrets.AWS_PUBLIC_DNS_USER }}
+          privateKey: ${{ secrets.SERVER_SSH_KEY }}
+          debug: false
+          command: |
+            cd nodeapps/stories-backend
+            npm install
+            sudo systemctl stop stories-backend
+            sudo cp stories-backend.service /lib/systemd/system/stories-backend.service
+            sudo systemctl daemon-reload
+            sudo systemctl start stories-backend
