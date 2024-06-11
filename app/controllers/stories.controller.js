@@ -6,6 +6,7 @@ const Language = db.language;
 const Story = db.story;
 const Character = db.character;
 const StoryCharacter = db.storyCharacter;
+
 const { CohereClient } = require("cohere-ai");
 
 const cohere = new CohereClient({
@@ -61,7 +62,7 @@ exports.create = async (req, res) => {
         genreId: genreId?.genreId,
         settingId: settingId?.settingId,
         languageId: languageId?.languageId,
-        storyLength: 100,
+        storyLength: parseInt(storyLength),
         content: chat?.text,
       };
 
@@ -103,6 +104,7 @@ exports.create = async (req, res) => {
     });
   }
 };
+
 exports.findAll = async (req, res) => {
   await Story.findAll().then((data) => {
     res.send({
@@ -117,7 +119,7 @@ exports.findAllByUserId = async (req, res) => {
   const userId = parseInt(req.params.id);
   try {
     await Story.findAll({
-      where: { userId: userId },
+      where: { userId: userId, isDeleted: false },
       attributes: { exclude: ["genreId", "settingId", "languageId"] },
       include: [
         { model: Genre, as: "genre", required: true },
@@ -148,7 +150,7 @@ exports.findOne = async (req, res) => {
   const storyId = parseInt(req.params.id);
   try {
     await Story.findOne({
-      where: { id: storyId },
+      where: { id: storyId, isDeleted: false },
       attributes: { exclude: ["genreId", "settingId", "languageId"] },
       include: [
         { model: Genre, as: "genre", required: true },
@@ -177,6 +179,59 @@ exports.findOne = async (req, res) => {
   } catch (err) {
     res.status(500).send({
       message: err.message || "Error fetching story",
+      status: "Error",
+    });
+  }
+};
+
+exports.update = async (req, res) => {
+  const storyId = req.params.id; 
+  const updatedStoryData = req.body;
+  
+
+  try {
+    const story = await Story.findByPk(storyId);
+
+    if (!story) {
+      return res.send({
+        message: "Story not found",
+        status: "Error",
+      });
+    }
+
+    await story.update(updatedStoryData);
+
+    res.send({
+      message: "Story updated successfully",
+      status: "Success",
+    });
+  } catch (error) {
+    console.error('Error updating story:', error);
+    res.status(500).json({ message: 'Error updating story' });
+  }
+
+  
+}
+
+exports.delete = async (req, res) => {
+  const id = parseInt(req.params.id);
+  try {
+    const story = await Story.findByPk(id);
+    if (!story) {
+      res.send({
+        message: `Story with ID ${id} not found`,
+        status: "Error",
+      });
+    } else {
+      await story.update({ isDeleted: true });
+      res.send({
+        message: "Story deleted successfully",
+        status: "Success",
+      });
+    }
+  } catch (err) {
+    res.status(500).send({
+      message: err.message || "Error deleting story",
       status: "Error",
     });
   }
