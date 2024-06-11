@@ -184,6 +184,59 @@ exports.findOne = async (req, res) => {
   }
 };
 
+exports.update = async (req, res) => {
+  const storyId = req.params.id; 
+  const updatedStoryData = req.body;
+  
+
+  try {
+    const story = await Story.findByPk(storyId);
+
+    if (!story) {
+      return res.send({
+        message: "Story not found",
+        status: "Error",
+      });
+    }
+
+    await story.update(updatedStoryData);
+
+    res.send({
+      message: "Story updated successfully",
+      status: "Success",
+    });
+  } catch (error) {
+    console.error('Error updating story:', error);
+    res.status(500).json({ message: 'Error updating story' });
+  }
+
+  
+}
+
+exports.delete = async (req, res) => {
+  const id = parseInt(req.params.id);
+  try {
+    const story = await Story.findByPk(id);
+    if (!story) {
+      res.send({
+        message: `Story with ID ${id} not found`,
+        status: "Error",
+      });
+    } else {
+      await story.update({ isDeleted: true });
+      res.send({
+        message: "Story deleted successfully",
+        status: "Success",
+      });
+    }
+  } catch (err) {
+    res.status(500).send({
+      message: err.message || "Error deleting story",
+      status: "Error",
+    });
+  }
+};
+
 exports.getStoryProperties = async (req, res) => {
   try {
     const genres = await Genre.findAll();
