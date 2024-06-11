@@ -182,6 +182,35 @@ exports.findOne = async (req, res) => {
   }
 };
 
+exports.update = async (req, res) => {
+  const storyId = req.params.id; 
+  const updatedStoryData = req.body;
+  
+
+  try {
+    const story = await Story.findByPk(storyId);
+
+    if (!story) {
+      return res.send({
+        message: "Story not found",
+        status: "Error",
+      });
+    }
+
+    await story.update(updatedStoryData);
+
+    res.send({
+      message: "Story updated successfully",
+      status: "Success",
+    });
+  } catch (error) {
+    console.error('Error updating story:', error);
+    res.status(500).json({ message: 'Error updating story' });
+  }
+
+  
+}
+
 exports.getStoryProperties = async (req, res) => {
   try {
     const genres = await Genre.findAll();
