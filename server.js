@@ -114,7 +114,7 @@ db.sequelize
 
   })
   .catch((e) => {
-    console.log("Error creating table", e);
+    console.log("Error creating table", e, process.env.DB_USER);
   });
 
 var corsOptions = {
