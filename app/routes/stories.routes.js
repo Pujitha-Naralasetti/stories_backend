@@ -27,6 +27,9 @@ module.exports = (app) => {
 
   // Retrieve a all the story properties
   router.get("/storyProperties", [authenticateRoute], Story.getStoryProperties);
+  
+   // Generate PDF
+   router.get('/stories/generatePDF/:id', Story.generatePDF)
 
   app.use("/storiesapi", router);
 };

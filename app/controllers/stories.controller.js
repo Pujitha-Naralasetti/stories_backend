@@ -1,3 +1,4 @@
+const { jsPDF } = require("jspdf");
 const db = require("../models");
 const { Op } = require("sequelize");
 const Genre = db.genre;
@@ -6,7 +7,7 @@ const Language = db.language;
 const Story = db.story;
 const Character = db.character;
 const StoryCharacter = db.storyCharacter;
-
+const doc = new jsPDF();
 const { CohereClient } = require("cohere-ai");
 
 const cohere = new CohereClient({
@@ -253,4 +254,68 @@ exports.getStoryProperties = async (req, res) => {
       status: "Error",
     });
   }
+};
+
+exports.generatePDF = async (req, res) => {
+  const storyId = req.params.id;
+  const story = await Story.findByPk(storyId);
+  if (!story) {
+    return res.send({
+      message: `Story with ID ${id} not found`,
+      status: "Error",
+    });
+  }
+
+  const titleFontSize = 20;
+  const titleFontFamily = "timesnewroman";
+  const contentFontSize = 12;
+  const contentFontFamily = "helvetica";
+  const contentColor = [0, 0, 0];
+
+  // Define margins and page width
+  const margin = 20;
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  // Calculate title width
+  const titleWidth = doc.getTextWidth(story.title);
+
+  // Calculate horizontal offset for centering
+  const titleOffsetX = (pageWidth - titleWidth) / 2;
+
+  // Set font and color for title
+  doc.setFont(titleFontFamily, titleFontSize);
+  doc.setTextColor(...contentColor); // Use defined color
+
+  // Write title centered at y-position 10 (adjust as needed)
+  doc.text(titleOffsetX, 10, story.title);
+
+  // Define line spacing and initial y-position for content
+  const lineHeight = 5; // Adjust line spacing for readability
+  let contentY = margin + titleFontSize + lineHeight; // Start below title
+
+  // Function to split and write content with overflow handling
+  function writeOverflowContent(text, maxWidth, y) {
+    const lines = doc.splitTextToSize(text, maxWidth);
+    for (let line of lines) {
+      doc.text(margin, y, line); // Write each line with margin
+      y += lineHeight; // Move down for next line
+      if (y + lineHeight > doc.internal.pageSize.getHeight() - margin) {
+        // Reached page bottom, add overflow message
+        doc.text(margin, y, "... (Content continues on next page)");
+        doc.addPage()
+        y = 45
+        doc.text(margin, y, line);
+      }
+    }
+  }
+
+  // Write story content with overflow handling
+  writeOverflowContent(story.content, pageWidth - margin * 2, contentY);
+
+  const pdfDataUri = doc.output("datauristring");
+  const base64Data = pdfDataUri.split(",")[1]; // Extract base64 data
+  const buffer = Buffer.from(base64Data, "base64");
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", "attachment; filename=story.pdf");
+  res.send(buffer); // Send PDF buffer to frontend
 };
