@@ -156,10 +156,13 @@ exports.findByEmail = (req, res) => {
 
 // Update a User by the id in the request
 exports.update = (req, res) => {
-  const id = req.params.id;
+  const userId = req.params.id;
 
-  User.update(req.body, {
-    where: { id: id },
+  const {firstName, lastName, email} = req.body;
+  const updatedUserDetails= {firstName, lastName, email};
+
+  User.update(updatedUserDetails, {
+    where: { id: userId },
   })
     .then((number) => {
       if (number == 1) {
