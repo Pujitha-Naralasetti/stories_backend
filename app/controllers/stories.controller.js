@@ -319,3 +319,52 @@ exports.generatePDF = async (req, res) => {
   res.setHeader("Content-Disposition", "attachment; filename=story.pdf");
   res.send(buffer); // Send PDF buffer to frontend
 };
+exports.generateSequel = async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const story = await Story.findByPk(id);
+
+    if (!story) {
+      res.send({
+        message: "Story not found",
+        status: "Error",
+      });
+    } else {
+      // const prompt = `Write a sequel to the following story:\n${story.content}`;
+      const prompt = `Previously\n${story.content}\n\n The Sequel\nWrite a continuation of the story above.`;
+      const chat = await cohere.chat({
+        model: "c4ai-aya-23",
+        message: prompt,
+        task: "storytelling",
+        temperature: 0.8,
+      });
+
+      const filteredStory = chat?.text
+        .replace(/^.*\n\n/g, "")
+        .replace(/Title:.*\n/g, "")
+        .replace(/##.*\n/g, "")
+        .trim();
+        let updatedStory = ''
+      if(story.episodes === 1) {
+        updatedStory = `CHAPTER 1\n\n${story.content}\n\nCHAPTER ${++story.episodes}\n\n${filteredStory}`
+      }else {
+        updatedStory = `${story.content}\n\nCHAPTER ${++story.episodes}\n\n${filteredStory}`
+      }
+
+      await story.update({content: updatedStory, episodes: ++story.episodes})
+
+      res.status(200).send({
+        message: "Story sequel generated successfully",
+        status: "Success",
+        data: null,
+      });
+    }
+  } catch (error) {
+    res.status(500).send({
+      message: error.message || "Error creating story",
+      status: "Error",
+    });
+  }
+};
+
