@@ -31,5 +31,8 @@ module.exports = (app) => {
    // Generate PDF
    router.get('/stories/generatePDF/:id', Story.generatePDF)
 
+    // Generate Sequel
+  router.get('/stories/generateSequel/:id', [authenticateRoute], Story.generateSequel)
+
   app.use("/storiesapi", router);
 };
