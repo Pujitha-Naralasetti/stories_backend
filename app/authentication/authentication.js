@@ -23,12 +23,14 @@ authenticate = async (req, res, require = true) => {
       let email = credentials.slice(0, i);
       let password = credentials.slice(i + 1);
       let user = {};
-      await User.findAll({ where: { email: email } })
+      await User.findAll({ where: { email: email, isActive: true } })
         .then((data) => {
           user = data[0];
         })
-        .catch((error) => {
-          console.log(error);
+        .catch(() => {
+          res.status(401).send({
+            message: "User not found!",
+          });
         });
       if (user != null) {
         let hash = await hashPassword(password, user.salt);

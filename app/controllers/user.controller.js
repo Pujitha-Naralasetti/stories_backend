@@ -183,28 +183,29 @@ exports.update = (req, res) => {
 };
 
 // Delete a User with the specified id in the request
-exports.delete = (req, res) => {
+exports.delete = async (req, res) => {
   const id = req.params.id;
 
-  User.destroy({
-    where: { id: id },
-  })
-    .then((number) => {
-      if (number == 1) {
-        res.send({
-          message: "User was deleted successfully!",
-        });
-      } else {
-        res.send({
-          message: `Cannot delete User with id = ${id}. Maybe User was not found!`,
-        });
-      }
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message || "Could not delete User with id = " + id,
+  try {
+    const user = await User.findByPk(id);
+    if (!user) {
+      res.send({
+        message: `User with ID ${id} not found`,
+        status: "Error",
       });
+    } else {
+      await user.update({ isActive: false });
+      res.send({
+        message: "User deleted successfully",
+        status: "Success",
+      });
+    }
+  } catch (err) {
+    res.status(500).send({
+      message: err.message || "Could not delete User with id = " + id,
+      status: "Error",
     });
+  }
 };
 
 // Delete all People from the database.
