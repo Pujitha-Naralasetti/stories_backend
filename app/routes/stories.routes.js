@@ -30,6 +30,9 @@ module.exports = (app) => {
   
    // Generate PDF
    router.get('/stories/generatePDF/:id', Story.generatePDF)
+   
+   // Get Character Suggestions
+  router.get('/stories/characterSuggestions/:id', [authenticateRoute], Story.getCharactersSuggestions)
 
     // Generate Sequel
   router.get('/stories/generateSequel/:id', [authenticateRoute], Story.generateSequel)
