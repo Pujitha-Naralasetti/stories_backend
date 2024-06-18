@@ -14,6 +14,10 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       allowNull: false,
     },
+    isActive: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: true,
+    },
     password: {
       type: Sequelize.BLOB,
       allowNull: false,
