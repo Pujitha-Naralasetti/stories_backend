@@ -28,7 +28,7 @@ db.sequelize
             },
             {
               languageId: 3,
-              languageName: "Telugu",
+              languageName: "Spanish",
             },
           ])
           .then(() => {

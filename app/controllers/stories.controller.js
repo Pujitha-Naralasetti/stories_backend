@@ -368,3 +368,34 @@ exports.generateSequel = async (req, res) => {
   }
 };
 
+exports.getCharactersSuggestions = async (req, res) => {
+  const userId = parseInt(req.params.id);
+  try {
+    const characters = await Character.findAll({
+      include: {
+        model: Story,
+        where: {
+          userId: userId,
+        },
+      },
+      distinct: true, // Ensure characters are returned only once
+    });
+    const result = characters?.map((character) => ({
+      id: character.id,
+      name: character.name,
+      role: character.role,
+    }));
+    res.send({
+      message: "Characters fetched successfully",
+      data: result,
+      status: "Success",
+    });
+  } catch (err) {
+    res.status(500).send({
+      message: err.message || "Error fetching characters",
+      status: "Error",
+    });
+  }
+};
+
+
