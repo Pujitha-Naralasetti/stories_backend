@@ -352,7 +352,7 @@ exports.generateSequel = async (req, res) => {
         updatedStory = `${story.content}\n\nCHAPTER ${++story.episodes}\n\n${filteredStory}`
       }
 
-      await story.update({content: updatedStory, episodes: ++story.episodes})
+      await story.update({content: updatedStory, episodes: story.episodes})
 
       res.status(200).send({
         message: "Story sequel generated successfully",
