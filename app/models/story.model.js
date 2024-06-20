@@ -36,6 +36,11 @@ module.exports = (sequelize, Sequelize) => {
     isDeleted: {
       type: Sequelize.BOOLEAN,
       defaultValue: false, 
+    },
+    episodes: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      defaultValue: 1
     }
   });
 
